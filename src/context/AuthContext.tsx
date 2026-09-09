@@ -45,9 +45,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       console.error('Email sign in error:', err);
       if (err.code === 'auth/operation-not-allowed') {
-        setAuthError('Email/Password provider is not yet activated in your Firebase console. Please use Google Sign-In below or enable Email/Password in Firebase Authentication.');
-      } else if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setAuthError('Invalid email or password. Please verify your credentials or register as a new teacher.');
+        setAuthError('Email/Password provider is not yet activated in Firebase console.');
+      } else if (
+        err.code === 'auth/user-not-found' ||
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/invalid-credential'
+      ) {
+        setAuthError('Invalid email or password. If you do not have an account yet, click "Need a teacher login? Register here" below.');
       } else {
         setAuthError(err.message || 'Failed to sign in.');
       }
@@ -62,9 +66,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       console.error('Email register error:', err);
       if (err.code === 'auth/operation-not-allowed') {
-        setAuthError('Email/Password provider is not activated in Firebase console. Please use Google Sign-In below.');
+        setAuthError('Email/Password provider is not activated in Firebase console.');
       } else if (err.code === 'auth/email-already-in-use') {
-        setAuthError('An account with this email already exists. Please sign in instead.');
+        setAuthError('An account with this email already exists. Please switch to "Already have an account? Log In" and sign in.');
       } else if (err.code === 'auth/weak-password') {
         setAuthError('Password should be at least 6 characters.');
       } else {
@@ -81,7 +85,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await signInWithPopup(auth, provider);
     } catch (err: any) {
       console.error('Google sign in error:', err);
-      setAuthError(err.message || 'Failed to sign in with Google.');
+      if (err.code === 'auth/unauthorized-domain') {
+        setAuthError('Google Sign-In is blocked because this preview domain is not in Authorized Domains. Please use Email & Password above to login or register (no domain setup required).');
+      } else {
+        setAuthError(err.message || 'Failed to sign in with Google.');
+      }
       throw err;
     }
   };
